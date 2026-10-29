@@ -1,5 +1,791 @@
-<html>
-  <h1>
-    Test Header
-  </h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CricketVX — Cricket Players, Matches &amp; Stats</title>
+  <meta name="description" content="CricketVX is a cricket statistics website powered by the Avcros Datalink API. Search players, view profiles, and explore match data." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="CricketVX" />
+  <meta property="og:description" content="Cricket statistics powered by Avcros Datalink." />
+  <meta property="og:type" content="website" />
+
+  <!-- Inline favicon (no external file needed) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏏</text></svg>" />
+
+  <style>
+    /* ---------- Design tokens ---------- */
+    :root {
+      --bg: #0b1220;
+      --bg-soft: #111a2e;
+      --card: #16213a;
+      --card-hover: #1c2a49;
+      --border: #24314f;
+      --text: #e8edf7;
+      --text-muted: #9aa8c3;
+      --accent: #22c55e;
+      --accent-dark: #16a34a;
+      --danger: #f87171;
+      --radius: 14px;
+      --max-width: 1120px;
+      --font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font);
+      background: radial-gradient(1200px 600px at 50% -10%, #14213d 0%, var(--bg) 55%);
+      color: var(--text);
+      line-height: 1.55;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ---------- Header ---------- */
+    header.site-header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(11, 18, 32, 0.75);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand .mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent), #0ea5e9);
+      display: grid;
+      place-items: center;
+      font-size: 1rem;
+    }
+
+    .brand .vx { color: var(--accent); }
+
+    nav.main-nav {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    nav.main-nav a {
+      padding: 8px 12px;
+      border-radius: 9px;
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    nav.main-nav a:hover,
+    nav.main-nav a:focus-visible {
+      background: var(--bg-soft);
+      color: var(--text);
+    }
+
+    nav.main-nav a[aria-disabled="true"] {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    /* ---------- Hero ---------- */
+    main { flex: 1; }
+
+    .hero {
+      padding: 64px 0 40px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.1;
+      margin: 0 0 14px;
+      letter-spacing: -0.03em;
+    }
+
+    .hero h1 .grad {
+      background: linear-gradient(90deg, var(--accent), #38bdf8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      margin: 0 auto 30px;
+      max-width: 620px;
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+
+    /* ---------- Search ---------- */
+    .search-form {
+      display: flex;
+      gap: 10px;
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .search-form:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+    }
+
+    .search-form input {
+      flex: 1;
+      min-width: 0;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 1rem;
+      padding: 10px 8px 10px 16px;
+      font-family: inherit;
+    }
+
+    .search-form input::placeholder { color: #6b7a99; }
+
+    .search-form button {
+      flex-shrink: 0;
+      border: none;
+      cursor: pointer;
+      padding: 11px 22px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #04220f;
+      font-weight: 700;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: background 0.15s, transform 0.05s;
+    }
+
+    .search-form button:hover { background: var(--accent-dark); color: #fff; }
+    .search-form button:active { transform: translateY(1px); }
+    .search-form button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .hint {
+      margin-top: 14px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .hint code {
+      background: var(--bg-soft);
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 0.82em;
+    }
+
+    /* ---------- Results ---------- */
+    .results-section { padding: 10px 0 70px; }
+
+    .status {
+      max-width: 620px;
+      margin: 0 auto 22px;
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      font-size: 0.92rem;
+      display: none;
+      text-align: left;
+    }
+
+    .status.show { display: block; }
+    .status.info  { background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-muted); }
+    .status.error { background: rgba(248, 113, 113, 0.08); border: 1px solid rgba(248, 113, 113, 0.35); color: var(--danger); }
+    .status.warn  { background: rgba(250, 204, 21, 0.07); border: 1px solid rgba(250, 204, 21, 0.3); color: #fde68a; }
+
+    .results-head {
+      display: none;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 16px;
+      flex-wrap: wrap;
+    }
+
+    .results-head.show { display: flex; }
+
+    .results-head h2 {
+      font-size: 1.1rem;
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .results-head .count { color: var(--text-muted); font-size: 0.9rem; }
+
+    .player-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .player-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: background 0.15s, border-color 0.15s, transform 0.12s;
+    }
+
+    .player-card:hover,
+    .player-card:focus-visible {
+      background: var(--card-hover);
+      border-color: #33456d;
+      transform: translateY(-2px);
+    }
+
+    .player-card .top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 1rem;
+      background: linear-gradient(135deg, #1e3a5f, #0f2a45);
+      color: #7dd3fc;
+      border: 1px solid var(--border);
+    }
+
+    .player-card .name {
+      font-weight: 700;
+      font-size: 1.02rem;
+      margin: 0;
+      line-height: 1.25;
+    }
+
+    .player-card .team {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin: 2px 0 0;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      font-size: 0.74rem;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .chip.accent {
+      background: rgba(34, 197, 94, 0.1);
+      border-color: rgba(34, 197, 94, 0.3);
+      color: #86efac;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 18px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 0.82rem;
+    }
+
+    .stats-row .stat-label {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .stats-row .stat-value {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    /* Skeleton loading */
+    .skeleton {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      height: 168px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skeleton::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+      animation: shimmer 1.3s infinite;
+    }
+
+    @keyframes shimmer {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* ---------- Feature strip ---------- */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      padding: 30px 0 60px;
+      border-top: 1px solid var(--border);
+    }
+
+    .feature {
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+
+    .feature h3 {
+      margin: 0 0 6px;
+      font-size: 0.98rem;
+    }
+
+    .feature p {
+      margin: 0;
+      font-size: 0.86rem;
+      color: var(--text-muted);
+    }
+
+    .feature .soon {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.1);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    /* ---------- Footer ---------- */
+    footer.site-footer {
+      border-top: 1px solid var(--border);
+      padding: 26px 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    footer a { color: #7dd3fc; text-decoration: underline; text-underline-offset: 2px; }
+    footer a:hover { color: #bae6fd; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 640px) {
+      .hero { padding: 42px 0 28px; }
+      .search-form { flex-direction: column; border-radius: var(--radius); }
+      .search-form button { border-radius: 10px; }
+      .search-form input { padding: 12px 14px; }
+      nav.main-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="./index.html" aria-label="CricketVX home">
+        <span class="mark" aria-hidden="true">🏏</span>
+        <span>Cricket<span class="vx">VX</span></span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="./players.html">Players</a>
+        <a href="#" aria-disabled="true" title="Awaiting Avcros match endpoints">Matches</a>
+        <a href="#" aria-disabled="true" title="Awaiting Avcros team endpoints">Teams</a>
+        <a href="#" aria-disabled="true" title="Awaiting Avcros series endpoints">Series</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== Main ===== -->
+  <main>
+    <section class="hero container">
+      <h1>Every cricketer.<br /><span class="grad">One search away.</span></h1>
+      <p>
+        CricketVX brings verified player profiles and statistics together, powered by
+        the Avcros Datalink API. Start by searching for any player by name.
+      </p>
+
+      <form class="search-form" id="search-form" role="search" autocomplete="off">
+        <label for="search-input" class="visually-hidden" style="position:absolute;left:-9999px;">Search players</label>
+        <input
+          id="search-input"
+          name="q"
+          type="search"
+          placeholder="Search a player, e.g. Rashid Khan"
+          aria-describedby="search-hint"
+          minlength="2"
+        />
+        <button type="submit" id="search-btn">Search</button>
+      </form>
+
+      <p class="hint" id="search-hint">
+        Results are provided by <strong>Avcros Datalink</strong>. Try <code>Rashid</code>,
+        <code>Kohli</code>, or <code>Stokes</code>.
+      </p>
+    </section>
+
+    <section class="results-section container" aria-labelledby="results-title">
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+
+      <div class="results-head" id="results-head">
+        <h2 id="results-title">Results</h2>
+        <span class="count" id="results-count"></span>
+      </div>
+
+      <div class="player-grid" id="results-grid"></div>
+    </section>
+
+    <section class="container">
+      <div class="features">
+        <div class="feature">
+          <h3>Player profiles</h3>
+          <p>Team, role, batting and bowling style, plus format-by-format stats.</p>
+        </div>
+        <div class="feature">
+          <h3>Match scorecards</h3>
+          <p>Innings summaries and full scorecards for every game.</p>
+          <span class="soon">Awaiting Avcros API</span>
+        </div>
+        <div class="feature">
+          <h3>Teams &amp; squads</h3>
+          <p>Rosters and team-level records across formats.</p>
+          <span class="soon">Awaiting Avcros API</span>
+        </div>
+        <div class="feature">
+          <h3>Series</h3>
+          <p>Tournaments and bilateral series with match grouping.</p>
+          <span class="soon">Awaiting Avcros API</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>
+        &copy; <span id="year"></span> CricketVX. All cricket data provided by
+        <a href="https://avcros.com" target="_blank" rel="noopener noreferrer">Avcros Datalink</a>.
+      </span>
+      <span>Built with plain HTML, CSS &amp; JavaScript.</span>
+    </div>
+  </footer>
+
+  <script>
+    /* =====================================================================
+       CricketVX — Home page logic
+       Data source: Avcros Datalink API (https://api.avcros.com/v1)
+       ===================================================================== */
+
+    // ---------------------------------------------------------------------
+    // CONFIG — put your Avcros API key here.
+    // NOTE: this is a static site, so the key is visible in the browser.
+    //       Use a Free-tier key only. See README "Security Limitation".
+    // ---------------------------------------------------------------------
+    const AVCROS = {
+      baseUrl: 'https://api.avcros.com/v1',
+      apiKey: 'avcros_live_your_api_key' // <-- replace this
+    };
+
+    // ---------------------------------------------------------------------
+    // Element references
+    // ---------------------------------------------------------------------
+    const form        = document.getElementById('search-form');
+    const input       = document.getElementById('search-input');
+    const button      = document.getElementById('search-btn');
+    const statusEl    = document.getElementById('status');
+    const resultsHead = document.getElementById('results-head');
+    const resultsGrid = document.getElementById('results-grid');
+    const resultsCount= document.getElementById('results-count');
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ---------------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------------
+    function showStatus(message, type = 'info') {
+      statusEl.textContent = message;
+      statusEl.className = `status show ${type}`;
+    }
+
+    function hideStatus() {
+      statusEl.className = 'status';
+      statusEl.textContent = '';
+    }
+
+    function hideResults() {
+      resultsHead.classList.remove('show');
+      resultsGrid.innerHTML = '';
+    }
+
+    function showSkeletons(n = 6) {
+      resultsHead.classList.add('show');
+      resultsCount.textContent = 'Loading…';
+      resultsGrid.innerHTML = Array.from({ length: n })
+        .map(() => '<div class="skeleton" aria-hidden="true"></div>')
+        .join('');
+    }
+
+    function initials(name) {
+      if (!name) return '?';
+      return name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map(w => w[0].toUpperCase())
+        .join('');
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // ---------------------------------------------------------------------
+    // Avcros API client
+    // ---------------------------------------------------------------------
+    async function avcrosGet(path, signal) {
+      const res = await fetch(`${AVCROS.baseUrl}${path}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${AVCROS.apiKey}`,
+          'Accept': 'application/json'
+        },
+        signal
+      });
+
+      if (res.status === 429) {
+        throw new Error('RATE_LIMIT');
+      }
+      if (!res.ok) {
+        throw new Error(`API_ERROR_${res.status}`);
+      }
+      return res.json();
+    }
+
+    async function searchPlayers(name, signal) {
+      // sessionStorage cache to protect the 1,000/month Free tier
+      const cacheKey = `cvx:players:${name.toLowerCase()}`;
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        try { return JSON.parse(cached); } catch (_) { /* ignore bad cache */ }
+      }
+
+      const data = await avcrosGet(
+        `/cricket/players?name=${encodeURIComponent(name)}`,
+        signal
+      );
+
+      const list = Array.isArray(data) ? data : (data?.data ?? []);
+      try { sessionStorage.setItem(cacheKey, JSON.stringify(list)); } catch (_) {}
+      return list;
+    }
+
+    // ---------------------------------------------------------------------
+    // Rendering
+    // ---------------------------------------------------------------------
+    function t20Stats(player) {
+      const stats = player?.player_stats?.t20;
+      if (!stats) return null;
+      return {
+        wickets: stats?.bowling?.wickets,
+        economy: stats?.bowling?.economy,
+        runs:    stats?.batting?.runs,
+        average: stats?.batting?.average
+      };
+    }
+
+    function playerCard(player) {
+      const id    = escapeHtml(player.id ?? '');
+      const name  = escapeHtml(player.name ?? 'Unknown player');
+      const team  = escapeHtml(player.team ?? '');
+      const role  = escapeHtml(player.role ?? '');
+      const bat   = escapeHtml(player.batting_style ?? '');
+      const bowl  = escapeHtml(player.bowling_style ?? '');
+      const stats = t20Stats(player);
+
+      const statBlock = stats
+        ? `
+          <div class="stats-row">
+            ${stats.wickets != null ? `<div><span class="stat-label">T20 wickets</span><span class="stat-value">${escapeHtml(stats.wickets)}</span></div>` : ''}
+            ${stats.economy != null ? `<div><span class="stat-label">T20 economy</span><span class="stat-value">${escapeHtml(stats.economy)}</span></div>` : ''}
+            ${stats.runs    != null ? `<div><span class="stat-label">T20 runs</span><span class="stat-value">${escapeHtml(stats.runs)}</span></div>` : ''}
+          </div>`
+        : '';
+
+      return `
+        <a class="player-card" href="./player.html?id=${encodeURIComponent(player.id ?? '')}">
+          <div class="top">
+            <div class="avatar" aria-hidden="true">${initials(player.name)}</div>
+            <div>
+              <p class="name">${name}</p>
+              ${team ? `<p class="team">${team}</p>` : ''}
+            </div>
+          </div>
+          <div class="meta-row">
+            ${role ? `<span class="chip accent">${role}</span>` : ''}
+            ${bat  ? `<span class="chip">${bat}</span>`  : ''}
+            ${bowl ? `<span class="chip">${bowl}</span>` : ''}
+          </div>
+          ${statBlock}
+        </a>`;
+    }
+
+    function renderResults(players, query) {
+      resultsHead.classList.add('show');
+      resultsCount.textContent =
+        `${players.length} result${players.length === 1 ? '' : 's'} for “${query}”`;
+
+      resultsGrid.innerHTML = players.map(playerCard).join('');
+    }
+
+    // ---------------------------------------------------------------------
+    // Search flow
+    // ---------------------------------------------------------------------
+    let controller = null;
+    let debounceTimer = null;
+
+    async function runSearch(query) {
+      const q = query.trim();
+      if (q.length < 2) {
+        hideStatus();
+        hideResults();
+        return;
+      }
+
+      if (AVCROS.apiKey.includes('your_api_key')) {
+        hideResults();
+        showStatus(
+          'No Avcros API key configured. Open this file and set AVCROS.apiKey to your key from the Avcros Developer Dashboard.',
+          'warn'
+        );
+        return;
+      }
+
+      // Cancel any in-flight request
+      if (controller) controller.abort();
+      controller = new AbortController();
+
+      hideStatus();
+      button.disabled = true;
+      showSkeletons();
+
+      try {
+        const players = await searchPlayers(q, controller.signal);
+
+        if (!players.length) {
+          hideResults();
+          showStatus(`No players found for “${q}”. Try a different spelling or a shorter query.`, 'info');
+          return;
+        }
+
+        renderResults(players, q);
+      } catch (err) {
+        if (err.name === 'AbortError') return; // superseded by a newer request
+
+        hideResults();
+
+        if (err.message === 'RATE_LIMIT') {
+          showStatus('The Avcros API rate limit was reached. Please wait a moment and try again.', 'error');
+        } else if (err.message?.startsWith('API_ERROR_401') || err.message?.startsWith('API_ERROR_403')) {
+          showStatus('Avcros rejected the API key. Check that AVCROS.apiKey in this file is valid.', 'error');
+        } else if (err instanceof TypeError) {
+          showStatus(
+            'Could not reach the Avcros API. This is usually a network error or a CORS restriction — the browser may be blocked from calling api.avcros.com directly. See the README for details.',
+            'error'
+          );
+        } else {
+          showStatus(`Something went wrong contacting Avcros (${err.message}). Please try again.`, 'error');
+        }
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    // Live search with debounce
+    input.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      const value = input.value;
+      debounceTimer = setTimeout(() => runSearch(value), 350);
+    });
+
+    // Submit
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearTimeout(debounceTimer);
+      runSearch(input.value);
+    });
+
+    // Focus the search box on load
+    window.addEventListener('load', () => input.focus());
+  </script>
+</body>
 </html>
